@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import './Dashboard.css';
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalIncome: 0,
@@ -20,33 +20,33 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('🔄 Dashboard mounted, fetching data...');
+    console.log('Dashboard mounted, fetching data...');
     fetchDashboardData();
     fetchExpenses();
   }, [currentPage]);
 
   const fetchDashboardData = async () => {
     try {
-      console.log('📊 Fetching dashboard data...');
+      console.log('Fetching dashboard data...');
       const response = await axios.get('http://localhost:5000/api/expenses/dashboard');
-      console.log('✅ Dashboard data:', response.data);
+      console.log('Dashboard data:', response.data);
       setStats(response.data.data || response.data);
     } catch (error) {
-      console.error('❌ Error fetching dashboard data:', error);
+      console.error(' Error fetching dashboard data:', error);
       setError('Failed to load dashboard data');
     }
   };
 
   const fetchExpenses = async () => {
     try {
-      console.log('📋 Fetching expenses...');
+      console.log('Fetching expenses...');
       const response = await axios.get(`http://localhost:5000/api/expenses?page=${currentPage}&limit=5`);
-      console.log('✅ Expenses data:', response.data);
+      console.log('Expenses data:', response.data);
       setExpenses(response.data.data?.expenses || response.data.expenses || []);
       setTotalPages(response.data.data?.totalPages || response.data.totalPages || 1);
       setLoading(false);
     } catch (error) {
-      console.error('❌ Error fetching expenses:', error);
+      console.error('Error fetching expenses:', error);
       setError('Failed to load expenses');
       setLoading(false);
     }
@@ -82,7 +82,7 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="error-container">
-        <h2>😕 Unable to Load Dashboard</h2>
+        <h2>Unable to Load Dashboard</h2>
         <p>{error}</p>
         <button onClick={() => window.location.reload()} className="retry-btn">
           Retry
@@ -94,7 +94,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <h1>💰 Expense Tracker Dashboard</h1>
+        <h1>Expense Tracker Dashboard</h1>
         <div className="user-info">
           <span>Welcome, {user?.name}</span>
           <button onClick={handleLogout} className="logout-btn">🚪 Logout</button>
@@ -122,12 +122,12 @@ const Dashboard = () => {
 
       <div className="expenses-section">
         <div className="section-header">
-          <h2>📊 Recent Transactions</h2>
+          <h2>Recent Transactions</h2>
           <button 
             onClick={() => navigate('/add-expense')} 
             className="add-button"
           >
-            ➕ Add New Transaction
+            Add New Transaction
           </button>
         </div>
 
@@ -164,13 +164,13 @@ const Dashboard = () => {
                     onClick={() => navigate(`/edit-expense/${expense._id}`)}
                     className="edit-btn"
                   >
-                    ✏️ Edit
+                     Edit
                   </button>
                   <button 
                     onClick={() => deleteExpense(expense._id)}
                     className="delete-btn"
                   >
-                    🗑️ Delete
+                     Delete
                   </button>
                 </div>
               </div>

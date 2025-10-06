@@ -50,20 +50,20 @@ const handleSubmit = async (e) => {
       type: formData.type,
       taxType: formData.taxType,
       taxAmount: parseFloat(formData.taxAmount) || 0,
-      totalAmount: totalAmount // ✅ Make sure this is included
+      totalAmount: totalAmount 
     };
 
     console.log('Sending expense data:', expenseData);
 
     const response = await axios.post('http://localhost:5000/api/expenses', expenseData);
     
-    console.log('✅ Expense added successfully:', response.data);
+    console.log(' Expense added successfully:', response.data);
     
-    // ✅ FIX: Navigate to dashboard after successful addition
+    
     navigate('/dashboard');
     
   } catch (error) {
-    console.error('❌ Error adding expense:', error);
+    console.error('Error adding expense:', error);
     
     if (error.response) {
       setError(error.response.data?.message || `Server error: ${error.response.status}`);

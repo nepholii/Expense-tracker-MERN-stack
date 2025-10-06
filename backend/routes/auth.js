@@ -4,14 +4,14 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
 
-// Register
+
+
 router.post('/register', async (req, res) => {
   try {
     console.log('📝 Registration attempt:', req.body);
     
     const { name, email, password, role } = req.body;
 
-    // ✅ Validate input
     if (!name || !email || !password) {
       return res.status(400).json({ 
         success: false,
@@ -19,7 +19,7 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Check if user exists
+  
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ 
@@ -28,31 +28,30 @@ router.post('/register', async (req, res) => {
       });
     }
     
-    // ✅ FIX: Create user with proper role handling
+    
     const userData = { 
       name, 
       email, 
       password 
     };
     
-    // Only allow role if provided and valid
+    
     if (role && (role === 'admin' || role === 'user')) {
       userData.role = role;
     }
     
     const user = await User.create(userData);
     
-    console.log('✅ User created:', user.email);
-    
-    // Create token
+    console.log('User created:', user.email);
+  
     const token = jwt.sign(
       { id: user._id }, 
-      process.env.JWT_SECRET || 'fallback_secret', // ✅ Add fallback
+      process.env.JWT_SECRET || 'fallback_secret', 
       { expiresIn: '30d' }
     );
     
     res.status(201).json({
-      success: true, // ✅ Add success flag
+      success: true, 
       message: 'User created successfully',
       token,
       user: {
@@ -63,7 +62,7 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ Registration error:', error);
+    console.error('Registration error:', error);
     res.status(500).json({ 
       success: false,
       message: 'Server error during registration',
@@ -72,14 +71,14 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login
+
 router.post('/login', async (req, res) => {
   try {
-    console.log('🔐 Login attempt:', req.body);
+    console.log('Login attempt:', req.body);
     
     const { email, password } = req.body;
 
-    // ✅ Validate input
+ 
     if (!email || !password) {
       return res.status(400).json({ 
         success: false,
@@ -87,37 +86,37 @@ router.post('/login', async (req, res) => {
       });
     }
     
-    // Find user
+ 
     const user = await User.findOne({ email });
     if (!user) {
-      console.log('❌ User not found:', email);
+      console.log('User not found:', email);
       return res.status(401).json({ 
         success: false,
         message: 'Invalid email or password' 
       });
     }
     
-    // ✅ FIX: Use bcrypt to compare passwords
+    
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      console.log('❌ Invalid password for:', email);
+      console.log('Invalid password for:', email);
       return res.status(401).json({ 
         success: false,
         message: 'Invalid email or password' 
       });
     }
     
-    console.log('✅ Login successful for:', user.email);
+    console.log('Login successful for:', user.email);
     
-    // Create token
+   
     const token = jwt.sign(
       { id: user._id }, 
-      process.env.JWT_SECRET || 'fallback_secret', // ✅ Add fallback
+      process.env.JWT_SECRET || 'fallback_secret', 
       { expiresIn: '30d' }
     );
     
     res.json({
-      success: true, // ✅ Add success flag
+      success: true, 
       message: 'Login successful',
       token,
       user: {
@@ -128,7 +127,7 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ Login error:', error);
+    console.error(' Login error:', error);
     res.status(500).json({ 
       success: false,
       message: 'Server error during login',

@@ -1,512 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import { useAuth } from "../context/AuthContext";
-// import axios from "axios";
-// import { useNavigate } from "react-router-dom";
-
-// const AdminDashboard = () => {
-//   const [users, setUsers] = useState([]);
-//   const [allExpenses, setAllExpenses] = useState([]);
-//   const [activeTab, setActiveTab] = useState("users");
-//   const [loading, setLoading] = useState(true);
-//   const [editingUser, setEditingUser] = useState(null);
-//   const [editingExpense, setEditingExpense] = useState(null);
-
-//   const { user, logout } = useAuth();
-//   const navigate = useNavigate();
-
-//   // Edit form states
-//   const [editUserForm, setEditUserForm] = useState({
-//     name: "",
-//     email: "",
-//     role: "user",
-//   });
-
-//   const [editExpenseForm, setEditExpenseForm] = useState({
-//     description: "",
-//     amount: "",
-//     type: "expense",
-//     taxType: "flat",
-//     taxAmount: "0",
-//   });
-
-//   useEffect(() => {
-//     if (user?.role === "admin") {
-//       fetchUsers();
-//       fetchAllExpenses();
-//     }
-//   }, [user]);
-
-//   // Fetch all users
-//   const fetchUsers = async () => {
-//     try {
-//       const response = await axios.get(
-//         "http://localhost:5000/api/expenses/admin/users"
-//       );
-//       setUsers(response.data.data?.users || response.data.users || []);
-//     } catch (error) {
-//       console.error("Error fetching users:", error);
-//     }
-//   };
-
-//   // Fetch all expenses
-//   const fetchAllExpenses = async () => {
-//     try {
-//       const response = await axios.get(
-//         "http://localhost:5000/api/expenses/admin/all-expenses"
-//       );
-//       setAllExpenses(
-//         response.data.data?.expenses || response.data.expenses || []
-//       );
-//       setLoading(false);
-//     } catch (error) {
-//       console.error("Error fetching all expenses:", error);
-//       setLoading(false);
-//     }
-//   };
-
-//   // ✅ EDIT USER: Open edit form
-//   const openEditUser = (user) => {
-//     setEditingUser(user._id);
-//     setEditUserForm({
-//       name: user.name,
-//       email: user.email,
-//       role: user.role,
-//     });
-//   };
-//   // In your AdminDashboard.jsx - update these functions:
-
-//   // ✅ UPDATE USER: Save user changes
-//   const updateUser = async (e) => {
-//     e.preventDefault();
-//     try {
-//       console.log("🔄 Updating user:", editingUser, editUserForm);
-//       const response = await axios.put(
-//         `http://localhost:5000/api/expenses/admin/users/${editingUser}`,
-//         editUserForm
-//       );
-//       console.log("✅ Update user response:", response.data);
-
-//       if (response.data.success) {
-//         setEditingUser(null);
-//         fetchUsers();
-//         alert("User updated successfully!");
-//       }
-//     } catch (error) {
-//       console.error("❌ Error updating user:", error);
-//       alert(error.response?.data?.message || "Error updating user");
-//     }
-//   };
-
-//   // ✅ DELETE USER
-//   const deleteUser = async (userId, userName) => {
-//     if (
-//       window.confirm(
-//         `Are you sure you want to delete user "${userName}"? This will also delete all their expenses.`
-//       )
-//     ) {
-//       try {
-//         console.log("🔄 Deleting user:", userId);
-//         const response = await axios.delete(
-//           `http://localhost:5000/api/expenses/admin/users/${userId}`
-//         );
-//         console.log("✅ Delete user response:", response.data);
-
-//         if (response.data.success) {
-//           fetchUsers();
-//           alert("User deleted successfully!");
-//         }
-//       } catch (error) {
-//         console.error("❌ Error deleting user:", error);
-//         alert(error.response?.data?.message || "Error deleting user");
-//       }
-//     }
-//   };
-
-//   // ✅ UPDATE EXPENSE: Save expense changes
-//   const updateExpense = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const totalAmount = calculateTotal(editExpenseForm);
-//       const expenseData = {
-//         ...editExpenseForm,
-//         amount: parseFloat(editExpenseForm.amount),
-//         taxAmount: parseFloat(editExpenseForm.taxAmount),
-//         totalAmount: totalAmount,
-//       };
-
-//       console.log("🔄 Updating expense:", editingExpense, expenseData);
-//       const response = await axios.put(
-//         `http://localhost:5000/api/expenses/admin/expense/${editingExpense}`,
-//         expenseData
-//       );
-//       console.log("✅ Update expense response:", response.data);
-
-//       if (response.data.success) {
-//         setEditingExpense(null);
-//         fetchAllExpenses();
-//         alert("Expense updated successfully!");
-//       }
-//     } catch (error) {
-//       console.error("❌ Error updating expense:", error);
-//       alert(error.response?.data?.message || "Error updating expense");
-//     }
-//   };
-
-//   // ✅ DELETE EXPENSE
-//   const deleteExpense = async (expenseId, description) => {
-//     if (
-//       window.confirm(
-//         `Are you sure you want to delete expense "${description}"?`
-//       )
-//     ) {
-//       try {
-//         console.log("🔄 Deleting expense:", expenseId);
-//         const response = await axios.delete(
-//           `http://localhost:5000/api/expenses/admin/expense/${expenseId}`
-//         );
-//         console.log("✅ Delete expense response:", response.data);
-
-//         if (response.data.success) {
-//           fetchAllExpenses();
-//           alert("Expense deleted successfully!");
-//         }
-//       } catch (error) {
-//         console.error("❌ Error deleting expense:", error);
-//         alert(error.response?.data?.message || "Error deleting expense");
-//       }
-//     }
-//   };
-
-//   const calculateTotal = (formData) => {
-//     const amount = parseFloat(formData.amount) || 0;
-//     const tax = parseFloat(formData.taxAmount) || 0;
-
-//     if (formData.taxType === "percentage") {
-//       return amount + (amount * tax) / 100;
-//     } else {
-//       return amount + tax;
-//     }
-//   };
-
-//   const handleLogout = () => {
-//     logout();
-//     navigate("/login");
-//   };
-
-//   if (loading) {
-//     return <div className="loading">Loading Admin Dashboard...</div>;
-//   }
-
-//   return (
-//     <div className="admin-container">
-//       <header className="admin-header">
-//         <h1>🔐 Admin Dashboard</h1>
-//         <div className="admin-actions">
-//           <span>Welcome, {user?.name} (ADMIN)</span>
-//           <button onClick={handleLogout} className="logout-btn">
-//             🚪 Logout
-//           </button>
-//         </div>
-//       </header>
-
-//       <div className="admin-tabs">
-//         <button
-//           className={`admin-tab ${activeTab === "users" ? "active" : ""}`}
-//           onClick={() => setActiveTab("users")}
-//         >
-//           👥 Manage Users ({users.length})
-//         </button>
-//         <button
-//           className={`admin-tab ${activeTab === "expenses" ? "active" : ""}`}
-//           onClick={() => setActiveTab("expenses")}
-//         >
-//           💰 Manage Expenses ({allExpenses.length})
-//         </button>
-//       </div>
-
-//       {/* USERS TAB */}
-//       {activeTab === "users" && (
-//         <div className="admin-section">
-//           <h2>👥 User Management</h2>
-
-//           {/* Edit User Form Overlay */}
-//           {editingUser && (
-//             <div className="form-overlay">
-//               <div className="form-card">
-//                 <h3>✏️ Edit User</h3>
-//                 <form onSubmit={updateUser}>
-//                   <div className="form-group">
-//                     <label>Name *</label>
-//                     <input
-//                       type="text"
-//                       value={editUserForm.name}
-//                       onChange={(e) =>
-//                         setEditUserForm({
-//                           ...editUserForm,
-//                           name: e.target.value,
-//                         })
-//                       }
-//                       required
-//                     />
-//                   </div>
-//                   <div className="form-group">
-//                     <label>Email *</label>
-//                     <input
-//                       type="email"
-//                       value={editUserForm.email}
-//                       onChange={(e) =>
-//                         setEditUserForm({
-//                           ...editUserForm,
-//                           email: e.target.value,
-//                         })
-//                       }
-//                       required
-//                     />
-//                   </div>
-//                   <div className="form-group">
-//                     <label>Role *</label>
-//                     <select
-//                       value={editUserForm.role}
-//                       onChange={(e) =>
-//                         setEditUserForm({
-//                           ...editUserForm,
-//                           role: e.target.value,
-//                         })
-//                       }
-//                     >
-//                       <option value="user">User</option>
-//                       <option value="admin">Admin</option>
-//                     </select>
-//                   </div>
-//                   <div className="form-actions">
-//                     <button
-//                       type="button"
-//                       onClick={() => setEditingUser(null)}
-//                       className="cancel-btn"
-//                     >
-//                       Cancel
-//                     </button>
-//                     <button type="submit" className="save-btn">
-//                       Update User
-//                     </button>
-//                   </div>
-//                 </form>
-//               </div>
-//             </div>
-//           )}
-
-//           <div className="users-grid">
-//             {users.map((user) => (
-//               <div key={user._id} className="user-card">
-//                 <div className="user-info">
-//                   <h4>{user.name}</h4>
-//                   <p>📧 {user.email}</p>
-//                   <p>
-//                     🎯 Role:{" "}
-//                     <span className={`role-badge ${user.role}`}>
-//                       {user.role}
-//                     </span>
-//                   </p>
-//                   <p>
-//                     📅 Joined: {new Date(user.createdAt).toLocaleDateString()}
-//                   </p>
-//                 </div>
-//                 <div className="user-actions">
-//                   <button
-//                     className="edit-btn"
-//                     onClick={() => openEditUser(user)}
-//                   >
-//                     ✏️ Edit
-//                   </button>
-//                   <button
-//                     className="delete-btn"
-//                     onClick={() => deleteUser(user._id, user.name)}
-//                   >
-//                     🗑️ Delete
-//                   </button>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-
-//       {/* EXPENSES TAB */}
-//       {activeTab === "expenses" && (
-//         <div className="admin-section">
-//           <h2>💰 Expense Management</h2>
-
-//           {/* Edit Expense Form Overlay */}
-//           {editingExpense && (
-//             <div className="form-overlay">
-//               <div className="form-card">
-//                 <h3>✏️ Edit Expense</h3>
-//                 <form onSubmit={updateExpense}>
-//                   <div className="form-group">
-//                     <label>Description *</label>
-//                     <input
-//                       type="text"
-//                       value={editExpenseForm.description}
-//                       onChange={(e) =>
-//                         setEditExpenseForm({
-//                           ...editExpenseForm,
-//                           description: e.target.value,
-//                         })
-//                       }
-//                       required
-//                     />
-//                   </div>
-//                   <div className="form-group">
-//                     <label>Amount ($) *</label>
-//                     <input
-//                       type="number"
-//                       value={editExpenseForm.amount}
-//                       onChange={(e) =>
-//                         setEditExpenseForm({
-//                           ...editExpenseForm,
-//                           amount: e.target.value,
-//                         })
-//                       }
-//                       required
-//                       min="0.01"
-//                       step="0.01"
-//                     />
-//                   </div>
-//                   <div className="form-group">
-//                     <label>Type *</label>
-//                     <select
-//                       value={editExpenseForm.type}
-//                       onChange={(e) =>
-//                         setEditExpenseForm({
-//                           ...editExpenseForm,
-//                           type: e.target.value,
-//                         })
-//                       }
-//                     >
-//                       <option value="expense">Expense</option>
-//                       <option value="income">Income</option>
-//                     </select>
-//                   </div>
-//                   <div className="form-group">
-//                     <label>Tax Type</label>
-//                     <select
-//                       value={editExpenseForm.taxType}
-//                       onChange={(e) =>
-//                         setEditExpenseForm({
-//                           ...editExpenseForm,
-//                           taxType: e.target.value,
-//                         })
-//                       }
-//                     >
-//                       <option value="flat">Flat Amount</option>
-//                       <option value="percentage">Percentage</option>
-//                     </select>
-//                   </div>
-//                   <div className="form-group">
-//                     <label>
-//                       Tax Amount{" "}
-//                       {editExpenseForm.taxType === "percentage" ? "(%)" : "($)"}
-//                     </label>
-//                     <input
-//                       type="number"
-//                       value={editExpenseForm.taxAmount}
-//                       onChange={(e) =>
-//                         setEditExpenseForm({
-//                           ...editExpenseForm,
-//                           taxAmount: e.target.value,
-//                         })
-//                       }
-//                       min="0"
-//                       step={
-//                         editExpenseForm.taxType === "percentage"
-//                           ? "0.1"
-//                           : "0.01"
-//                       }
-//                     />
-//                   </div>
-//                   <div className="form-group">
-//                     <label>Total Amount</label>
-//                     <div className="total-amount">
-//                       ${calculateTotal(editExpenseForm).toFixed(2)}
-//                     </div>
-//                   </div>
-//                   <div className="form-actions">
-//                     <button
-//                       type="button"
-//                       onClick={() => setEditingExpense(null)}
-//                       className="cancel-btn"
-//                     >
-//                       Cancel
-//                     </button>
-//                     <button type="submit" className="save-btn">
-//                       Update Expense
-//                     </button>
-//                   </div>
-//                 </form>
-//               </div>
-//             </div>
-//           )}
-
-//           <div className="admin-expenses-list">
-//             {allExpenses.map((expense) => (
-//               <div
-//                 key={expense._id}
-//                 className={`admin-expense-item ${expense.type}`}
-//               >
-//                 <div className="admin-expense-info">
-//                   <h4>{expense.description}</h4>
-//                   <p>
-//                     <strong>👤 User:</strong> {expense.userId?.name} (
-//                     {expense.userId?.email})
-//                   </p>
-//                   <p>
-//                     <strong>💰 Amount:</strong> ${expense.amount}
-//                   </p>
-//                   <p>
-//                     <strong>📊 Type:</strong>
-//                     <span className={`type-badge ${expense.type}`}>
-//                       {expense.type}
-//                     </span>
-//                   </p>
-//                   <p>
-//                     <strong>🧾 Total:</strong> ${expense.totalAmount}
-//                   </p>
-//                   <p>
-//                     <strong>📅 Date:</strong>{" "}
-//                     {new Date(expense.createdAt).toLocaleString()}
-//                   </p>
-//                 </div>
-//                 <div className="admin-expense-actions">
-//                   <button
-//                     className="edit-btn"
-//                     onClick={() => openEditExpense(expense)}
-//                   >
-//                     ✏️ Edit
-//                   </button>
-//                   <button
-//                     className="delete-btn"
-//                     onClick={() =>
-//                       deleteExpense(expense._id, expense.description)
-//                     }
-//                   >
-//                     🗑️ Delete
-//                   </button>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default AdminDashboard;
-
-
-
-
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
@@ -526,13 +17,14 @@ const AdminDashboard = () => {
     totalUsers: 0,
     totalExpenses: 0,
     totalIncome: 0,
+    totalExpenseAmount: 0,
     recentActivity: []
   });
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Form states
+
   const [userForm, setUserForm] = useState({
     name: "",
     email: "",
@@ -567,9 +59,12 @@ const AdminDashboard = () => {
     if (user?.role === "admin") {
       fetchUsers();
       fetchAllExpenses();
-      calculateStats();
     }
-  }, [user, users, allExpenses]);
+  }, [user]);
+
+  useEffect(() => {
+    calculateStats();
+  }, [users, allExpenses]);
 
   const fetchUsers = async () => {
     try {
@@ -597,6 +92,10 @@ const AdminDashboard = () => {
     const totalIncome = allExpenses
       .filter(expense => expense.type === 'income')
       .reduce((sum, expense) => sum + (expense.totalAmount || 0), 0);
+    
+    const totalExpenseAmount = allExpenses
+      .filter(expense => expense.type === 'expense')
+      .reduce((sum, expense) => sum + (expense.totalAmount || 0), 0);
 
     const recentActivity = [...allExpenses]
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -606,11 +105,12 @@ const AdminDashboard = () => {
       totalUsers,
       totalExpenses,
       totalIncome,
+      totalExpenseAmount,
       recentActivity
     });
   };
 
-  // CREATE: Add new user
+ 
   const createUser = async (e) => {
     e.preventDefault();
     try {
@@ -625,7 +125,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // CREATE: Add new expense
+ 
   const createExpense = async (e) => {
     e.preventDefault();
     try {
@@ -655,7 +155,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // EDIT USER: Open edit form
+ 
   const openEditUser = (user) => {
     setEditingUser(user._id);
     setEditUserForm({
@@ -665,7 +165,7 @@ const AdminDashboard = () => {
     });
   };
 
-  // UPDATE USER: Save user changes
+ 
   const updateUser = async (e) => {
     e.preventDefault();
     try {
@@ -682,7 +182,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // DELETE USER
+  
   const deleteUser = async (userId, userName) => {
     if (window.confirm(`Are you sure you want to delete user "${userName}"? This will also delete all their expenses.`)) {
       try {
@@ -696,7 +196,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // EDIT EXPENSE: Open edit form
+ 
   const openEditExpense = (expense) => {
     setEditingExpense(expense._id);
     setEditExpenseForm({
@@ -708,7 +208,7 @@ const AdminDashboard = () => {
     });
   };
 
-  // UPDATE EXPENSE: Save expense changes
+  
   const updateExpense = async (e) => {
     e.preventDefault();
     try {
@@ -733,7 +233,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // DELETE EXPENSE
   const deleteExpense = async (expenseId, description) => {
     if (window.confirm(`Are you sure you want to delete expense "${description}"?`)) {
       try {
@@ -774,40 +273,40 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      {/* Sidebar */}
-      <div className="admin-sidebar">
-        <div className="sidebar-header">
+     
+      <nav className="admin-navbar">
+        <div className="nav-brand">
           <h2>ExpenseTracker</h2>
           <span className="admin-badge">ADMIN</span>
         </div>
         
-        <nav className="sidebar-nav">
+        <div className="nav-tabs">
           <button 
-            className={`nav-item ${activeTab === "dashboard" ? "active" : ""}`}
+            className={`nav-tab ${activeTab === "dashboard" ? "active" : ""}`}
             onClick={() => setActiveTab("dashboard")}
           >
-            <span className="nav-icon">📊</span>
+            <span className="tab-icon">📊</span>
             Dashboard
           </button>
           <button 
-            className={`nav-item ${activeTab === "users" ? "active" : ""}`}
+            className={`nav-tab ${activeTab === "users" ? "active" : ""}`}
             onClick={() => setActiveTab("users")}
           >
-            <span className="nav-icon">👥</span>
+            <span className="tab-icon">👥</span>
             Users
-            <span className="nav-count">{users.length}</span>
+            <span className="tab-count">{users.length}</span>
           </button>
           <button 
-            className={`nav-item ${activeTab === "expenses" ? "active" : ""}`}
+            className={`nav-tab ${activeTab === "expenses" ? "active" : ""}`}
             onClick={() => setActiveTab("expenses")}
           >
-            <span className="nav-icon">💰</span>
+            <span className="tab-icon">💰</span>
             Expenses
-            <span className="nav-count">{allExpenses.length}</span>
+            <span className="tab-count">{allExpenses.length}</span>
           </button>
-        </nav>
+        </div>
 
-        <div className="sidebar-footer">
+        <div className="nav-user">
           <div className="user-info">
             <div className="user-avatar">
               {user?.name?.charAt(0).toUpperCase()}
@@ -818,29 +317,41 @@ const AdminDashboard = () => {
             </div>
           </div>
           <button onClick={handleLogout} className="logout-btn">
-            <span className="logout-icon">↪</span>
+            <span className="logout-icon">🚪</span>
             Logout
           </button>
         </div>
-      </div>
+      </nav>
 
-      {/* Main Content */}
       <div className="admin-main">
-        <header className="admin-header">
+        <header className="content-header">
           <h1>
             {activeTab === "dashboard" && "Dashboard Overview"}
             {activeTab === "users" && "User Management"}
             {activeTab === "expenses" && "Expense Management"}
           </h1>
           <div className="header-actions">
-            <div className="search-bar">
-              <input type="text" placeholder="Search..." />
-            </div>
+            {activeTab === "users" && (
+              <button 
+                onClick={() => setShowUserForm(true)}
+                className="btn-primary"
+              >
+                + Add User
+              </button>
+            )}
+            {activeTab === "expenses" && (
+              <button 
+                onClick={() => setShowExpenseForm(true)}
+                className="btn-primary"
+              >
+                + Add Expense
+              </button>
+            )}
           </div>
         </header>
 
         <div className="admin-content">
-          {/* DASHBOARD TAB */}
+        
           {activeTab === "dashboard" && (
             <div className="dashboard-overview">
               <div className="stats-grid">
@@ -865,114 +376,139 @@ const AdminDashboard = () => {
                     <p>Total Income</p>
                   </div>
                 </div>
+                <div className="stat-card">
+                  <div className="stat-icon expense">📉</div>
+                  <div className="stat-info">
+                    <h3>${stats.totalExpenseAmount.toFixed(2)}</h3>
+                    <p>Total Expenses</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="recent-activity">
-                <h2>Recent Activity</h2>
-                <div className="activity-list">
-                  {stats.recentActivity.map(activity => (
-                    <div key={activity._id} className="activity-item">
-                      <div className="activity-icon">
-                        {activity.type === 'income' ? '📈' : '📉'}
+              <div className="dashboard-content">
+                <div className="recent-activity">
+                  <h2>Recent Activity</h2>
+                  <div className="activity-list">
+                    {stats.recentActivity.map(activity => (
+                      <div key={activity._id} className="activity-item">
+                        <div className="activity-icon">
+                          {activity.type === 'income' ? '📈' : '📉'}
+                        </div>
+                        <div className="activity-details">
+                          <p className="activity-description">{activity.description}</p>
+                          <span className="activity-user">{activity.userId?.name}</span>
+                        </div>
+                        <div className="activity-amount">
+                          <span className={`amount ${activity.type}`}>
+                            ${activity.totalAmount?.toFixed(2)}
+                          </span>
+                          <span className="activity-date">
+                            {new Date(activity.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
-                      <div className="activity-details">
-                        <p className="activity-description">{activity.description}</p>
-                        <span className="activity-user">{activity.userId?.name}</span>
-                      </div>
-                      <div className="activity-amount">
-                        <span className={`amount ${activity.type}`}>
-                          ${activity.totalAmount?.toFixed(2)}
-                        </span>
-                        <span className="activity-date">
-                          {new Date(activity.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="quick-stats">
+                  <h2>Quick Stats</h2>
+                  <div className="stats-cards">
+                    <div className="quick-stat">
+                      <span className="stat-label">Active Users</span>
+                      <span className="stat-value">{users.length}</span>
                     </div>
-                  ))}
+                    <div className="quick-stat">
+                      <span className="stat-label">Today's Transactions</span>
+                      <span className="stat-value">
+                        {allExpenses.filter(exp => 
+                          new Date(exp.createdAt).toDateString() === new Date().toDateString()
+                        ).length}
+                      </span>
+                    </div>
+                    <div className="quick-stat">
+                      <span className="stat-label">This Month</span>
+                      <span className="stat-value">
+                        {allExpenses.filter(exp => 
+                          new Date(exp.createdAt).getMonth() === new Date().getMonth()
+                        ).length}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* USERS TAB */}
-          {activeTab === "users" && (
-            <div className="management-section">
-              <div className="section-header">
-                <h2>User Management</h2>
-                <button 
-                  onClick={() => setShowUserForm(true)}
-                  className="btn-primary"
-                >
-                  + Add User
-                </button>
-              </div>
+       
+{activeTab === "users" && (
+  <div className="management-section">
+    <div className="table-container">
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users
+            .filter(user => user.role === "user") 
+            .map(user => (
+              <tr key={user._id}>
+                <td>
+                  <div className="user-cell">
+                    <div className="user-avatar small">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    {user.name}
+                  </div>
+                </td>
+                <td>{user.email}</td>
+                <td>
+                  <span className={`role-badge ${user.role}`}>
+                    {user.role}
+                  </span>
+                </td>
+                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                <td>
+                  <div className="action-buttons">
+                    <button 
+                      className="btn-edit"
+                      onClick={() => openEditUser(user)}
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      className="btn-delete"
+                      onClick={() => deleteUser(user._id, user.name)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+      
+     
+      {users.filter(user => user.role === "user").length === 0 && (
+        <div className="no-data-message">
+          <p>No regular users found in the system.</p>
+        </div>
+      )}
+    </div>
+  </div>
+)}
 
-              <div className="table-container">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>User</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Joined Date</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map(user => (
-                      <tr key={user._id}>
-                        <td>
-                          <div className="user-cell">
-                            <div className="user-avatar small">
-                              {user.name.charAt(0).toUpperCase()}
-                            </div>
-                            {user.name}
-                          </div>
-                        </td>
-                        <td>{user.email}</td>
-                        <td>
-                          <span className={`role-badge ${user.role}`}>
-                            {user.role}
-                          </span>
-                        </td>
-                        <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                        <td>
-                          <div className="action-buttons">
-                            <button 
-                              className="btn-edit"
-                              onClick={() => openEditUser(user)}
-                            >
-                              Edit
-                            </button>
-                            <button 
-                              className="btn-delete"
-                              onClick={() => deleteUser(user._id, user.name)}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* EXPENSES TAB */}
+       
           {activeTab === "expenses" && (
             <div className="management-section">
-              <div className="section-header">
-                <h2>Expense Management</h2>
-                <button 
-                  onClick={() => setShowExpenseForm(true)}
-                  className="btn-primary"
-                >
-                  + Add Expense
-                </button>
-              </div>
-
               <div className="table-container">
                 <table className="data-table">
                   <thead>
@@ -1032,8 +568,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* MODALS */}
-      {/* Add User Modal */}
+    
       {showUserForm && (
         <div className="modal-overlay">
           <div className="modal">
@@ -1094,7 +629,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Add Expense Modal */}
+     
       {showExpenseForm && (
         <div className="modal-overlay">
           <div className="modal">
@@ -1163,7 +698,6 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Edit User Modal */}
       {editingUser && (
         <div className="modal-overlay">
           <div className="modal">
@@ -1215,7 +749,6 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Edit Expense Modal */}
       {editingExpense && (
         <div className="modal-overlay">
           <div className="modal">
