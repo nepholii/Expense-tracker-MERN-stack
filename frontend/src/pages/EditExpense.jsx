@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import './EditExpense.css';
+
 const EditExpense = () => {
   const [formData, setFormData] = useState({
     description: '',
@@ -26,10 +27,9 @@ const EditExpense = () => {
   const fetchExpense = async () => {
     try {
       console.log('Fetching expense with ID:', id);
-      const response = await axios.get(`http://localhost:5000/api/expenses/${id}`);
-      console.log(' Expense API response:', response.data);
+      const response = await axios.get(`/api/expenses/${id}`); // ✅ FIXED
+      console.log('Expense API response:', response.data);
       
-     
       const expense = response.data.data || response.data;
       
       if (!expense) {
@@ -48,7 +48,7 @@ const EditExpense = () => {
       
     } catch (error) {
       console.error('Error loading expense:', error);
-      console.error(' Error response:', error.response?.data);
+      console.error('Error response:', error.response?.data);
       setError(error.response?.data?.message || 'Error loading expense. Please try again.');
     } finally {
       setFetchLoading(false);
@@ -93,13 +93,13 @@ const EditExpense = () => {
 
       console.log('📤 Sending update data:', expenseData);
 
-      const response = await axios.put(`http://localhost:5000/api/expenses/${id}`, expenseData);
+      const response = await axios.put(`/api/expenses/${id}`, expenseData); // ✅ FIXED
       console.log('Update response:', response.data);
       
       navigate('/dashboard');
     } catch (error) {
       console.error('Error updating expense:', error);
-      console.error(' Error response:', error.response?.data);
+      console.error('Error response:', error.response?.data);
       setError(error.response?.data?.message || 'Error updating expense. Please try again.');
     } finally {
       setLoading(false);
