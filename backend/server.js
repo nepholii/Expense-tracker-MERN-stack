@@ -9,14 +9,14 @@ const User = require('./models/User');
 
 const app = express();
 
-// ✅ Enhanced CORS setup
+// ✅ Enhanced CORS setup - FIXED
 const allowedOrigins = [
   'http://localhost:5173', // local frontend
   'https://expense-tracker-mern-stack-production.up.railway.app', // deployed frontend
   process.env.CLIENT_URL // from environment variable
 ].filter(Boolean); // Remove any undefined values
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
@@ -31,10 +31,18 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+};
 
-// Handle preflight requests
-app.options('*', cors());
+app.use(cors(corsOptions));
+
+// ✅ Handle preflight requests for all routes - FIXED
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.status(200).send();
+});
 
 // ✅ Security middleware
 app.use(express.json({ limit: '10mb' }));
@@ -108,11 +116,11 @@ async function createAdminUser() {
       return;
     }
 
-    
+    const hashedPassword = await bcrypt.hash('admin123', 12);
     const adminUser = new User({
       name: 'System Admin',
       email: 'admin@example.com',
-      password: 'admin123',
+      password: hashedPassword,
       role: 'admin',
     });
 
@@ -219,6 +227,14 @@ app.use((err, req, res, next) => {
     });
   }
   
+  // CORS error
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({
+      success: false,
+      message: 'CORS policy: Origin not allowed'
+    });
+  }
+  
   // Default error
   res.status(err.status || 500).json({
     success: false,
@@ -235,9 +251,15 @@ app.use('/api/*', (req, res) => {
   });
 });
 
-// ✅ Catch-all handler for client-side routing
-// Ensures React routes work
-app.get(/^(?!\/api).*/, (req, res) => {
+// ✅ Catch-all handler for client-side routing - FIXED
+// Use explicit route instead of regex with *
+app.get('*', (req, res, next) => {
+  // Skip API routes
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  
+  // Serve React app for all other routes
   res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
@@ -255,7 +277,7 @@ initializeApp().then(() => {
     if (process.env.NODE_ENV === 'production') {
       console.log('🚀 Running in PRODUCTION mode');
     } else {
-      console('💻 Running in DEVELOPMENT mode');
+      console.log('💻 Running in DEVELOPMENT mode');
     }
   });
 }).catch(error => {
