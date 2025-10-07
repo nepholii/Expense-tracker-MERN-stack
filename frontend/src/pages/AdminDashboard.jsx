@@ -24,7 +24,6 @@ const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-
   const [userForm, setUserForm] = useState({
     name: "",
     email: "",
@@ -68,7 +67,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/expenses/admin/users");
+      const response = await axios.get("/api/expenses/admin/users"); // ✅ FIXED
       setUsers(response.data.data?.users || response.data.users || []);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -77,7 +76,7 @@ const AdminDashboard = () => {
 
   const fetchAllExpenses = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/expenses/admin/all-expenses");
+      const response = await axios.get("/api/expenses/admin/all-expenses"); // ✅ FIXED
       setAllExpenses(response.data.data?.expenses || response.data.expenses || []);
       setLoading(false);
     } catch (error) {
@@ -110,11 +109,10 @@ const AdminDashboard = () => {
     });
   };
 
- 
   const createUser = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/register", userForm);
+      const response = await axios.post("/api/auth/register", userForm); // ✅ FIXED
       if (response.data.success) {
         setShowUserForm(false);
         setUserForm({ name: "", email: "", role: "user", password: "" });
@@ -125,7 +123,6 @@ const AdminDashboard = () => {
     }
   };
 
- 
   const createExpense = async (e) => {
     e.preventDefault();
     try {
@@ -137,7 +134,7 @@ const AdminDashboard = () => {
         totalAmount: totalAmount,
       };
 
-      const response = await axios.post("http://localhost:5000/api/expenses/admin/create", expenseData);
+      const response = await axios.post("/api/expenses/admin/create", expenseData); // ✅ FIXED
       if (response.data.success) {
         setShowExpenseForm(false);
         setExpenseForm({ 
@@ -155,7 +152,6 @@ const AdminDashboard = () => {
     }
   };
 
- 
   const openEditUser = (user) => {
     setEditingUser(user._id);
     setEditUserForm({
@@ -165,12 +161,11 @@ const AdminDashboard = () => {
     });
   };
 
- 
   const updateUser = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/expenses/admin/users/${editingUser}`,
+        `/api/expenses/admin/users/${editingUser}`, // ✅ FIXED
         editUserForm
       );
       if (response.data.success) {
@@ -182,11 +177,10 @@ const AdminDashboard = () => {
     }
   };
 
-  
   const deleteUser = async (userId, userName) => {
     if (window.confirm(`Are you sure you want to delete user "${userName}"? This will also delete all their expenses.`)) {
       try {
-        const response = await axios.delete(`http://localhost:5000/api/expenses/admin/users/${userId}`);
+        const response = await axios.delete(`/api/expenses/admin/users/${userId}`); // ✅ FIXED
         if (response.data.success) {
           fetchUsers();
         }
@@ -196,7 +190,6 @@ const AdminDashboard = () => {
     }
   };
 
- 
   const openEditExpense = (expense) => {
     setEditingExpense(expense._id);
     setEditExpenseForm({
@@ -208,7 +201,6 @@ const AdminDashboard = () => {
     });
   };
 
-  
   const updateExpense = async (e) => {
     e.preventDefault();
     try {
@@ -221,7 +213,7 @@ const AdminDashboard = () => {
       };
 
       const response = await axios.put(
-        `http://localhost:5000/api/expenses/admin/expense/${editingExpense}`,
+        `/api/expenses/admin/expense/${editingExpense}`, // ✅ FIXED
         expenseData
       );
       if (response.data.success) {
@@ -236,7 +228,7 @@ const AdminDashboard = () => {
   const deleteExpense = async (expenseId, description) => {
     if (window.confirm(`Are you sure you want to delete expense "${description}"?`)) {
       try {
-        const response = await axios.delete(`http://localhost:5000/api/expenses/admin/expense/${expenseId}`);
+        const response = await axios.delete(`/api/expenses/admin/expense/${expenseId}`); // ✅ FIXED
         if (response.data.success) {
           fetchAllExpenses();
         }
@@ -273,7 +265,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-     
       <nav className="admin-navbar">
         <div className="nav-brand">
           <h2>ExpenseTracker</h2>
@@ -351,7 +342,6 @@ const AdminDashboard = () => {
         </header>
 
         <div className="admin-content">
-        
           {activeTab === "dashboard" && (
             <div className="dashboard-overview">
               <div className="stats-grid">
@@ -440,73 +430,70 @@ const AdminDashboard = () => {
             </div>
           )}
 
-       
-{activeTab === "users" && (
-  <div className="management-section">
-    <div className="table-container">
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Joined Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users
-            .filter(user => user.role === "user") 
-            .map(user => (
-              <tr key={user._id}>
-                <td>
-                  <div className="user-cell">
-                    <div className="user-avatar small">
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                    {user.name}
+          {activeTab === "users" && (
+            <div className="management-section">
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Joined Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users
+                      .filter(user => user.role === "user") 
+                      .map(user => (
+                        <tr key={user._id}>
+                          <td>
+                            <div className="user-cell">
+                              <div className="user-avatar small">
+                                {user.name.charAt(0).toUpperCase()}
+                              </div>
+                              {user.name}
+                            </div>
+                          </td>
+                          <td>{user.email}</td>
+                          <td>
+                            <span className={`role-badge ${user.role}`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                          <td>
+                            <div className="action-buttons">
+                              <button 
+                                className="btn-edit"
+                                onClick={() => openEditUser(user)}
+                              >
+                                Edit
+                              </button>
+                              <button 
+                                className="btn-delete"
+                                onClick={() => deleteUser(user._id, user.name)}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
+                
+                {users.filter(user => user.role === "user").length === 0 && (
+                  <div className="no-data-message">
+                    <p>No regular users found in the system.</p>
                   </div>
-                </td>
-                <td>{user.email}</td>
-                <td>
-                  <span className={`role-badge ${user.role}`}>
-                    {user.role}
-                  </span>
-                </td>
-                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                <td>
-                  <div className="action-buttons">
-                    <button 
-                      className="btn-edit"
-                      onClick={() => openEditUser(user)}
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      className="btn-delete"
-                      onClick={() => deleteUser(user._id, user.name)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
-      
-     
-      {users.filter(user => user.role === "user").length === 0 && (
-        <div className="no-data-message">
-          <p>No regular users found in the system.</p>
-        </div>
-      )}
-    </div>
-  </div>
-)}
+                )}
+              </div>
+            </div>
+          )}
 
-       
           {activeTab === "expenses" && (
             <div className="management-section">
               <div className="table-container">
@@ -568,7 +555,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-    
       {showUserForm && (
         <div className="modal-overlay">
           <div className="modal">
@@ -629,7 +615,6 @@ const AdminDashboard = () => {
         </div>
       )}
 
-     
       {showExpenseForm && (
         <div className="modal-overlay">
           <div className="modal">
