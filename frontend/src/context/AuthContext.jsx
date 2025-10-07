@@ -11,8 +11,8 @@ export const useAuth = () => {
   return context;
 };
 
-// ✅ Set your API base URL (works in both local + production)
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// ✅ Use environment variable for API URL
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -47,22 +47,28 @@ export const AuthProvider = ({ children }) => {
   // ✅ LOGIN
   const login = async (email, password) => {
     console.log("🔍 AuthContext - Login attempt:", email);
-    
+
     try {
       const response = await axios.post(`${API_URL}/auth/login`, { email, password });
 
       const { token, user: userData } = response.data;
-      console.log("✅ AuthContext - Login successful:", userData);
 
+      // Save token & user in localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(userData));
 
+      // Set axios default Authorization header
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      // Update state
       setUser(userData);
+
+      console.log("✅ AuthContext - Login successful:", userData);
 
       return { success: true, user: userData };
     } catch (error) {
       console.error("❌ AuthContext - Login failed:", error);
+
       const errorMessage = error.response?.data?.message || "Login failed";
       return { success: false, message: errorMessage };
     }
@@ -76,6 +82,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, message: "Registration successful! Please login." };
     } catch (error) {
       console.error("❌ AuthContext - Registration failed:", error);
+
       return {
         success: false,
         message: error.response?.data?.message || "Registration failed",
@@ -83,9 +90,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ LOGOUT
+ 
   const logout = () => {
     console.log("🔍 AuthContext - Logging out");
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     delete axios.defaults.headers.common["Authorization"];
@@ -94,9 +102,5 @@ export const AuthProvider = ({ children }) => {
 
   const value = { user, login, register, logout, loading };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

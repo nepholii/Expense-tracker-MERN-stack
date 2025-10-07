@@ -9,13 +9,21 @@ const User = require('./models/User');
 
 const app = express();
 
-app.use(cors());
+// ✅ CORS setup
+app.use(cors({
+  origin: [
+    'http://localhost:5173', // local frontend
+    'https://expense-tracker-mern-stack-production.up.railway.app' // deployed frontend
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 
-// Serve static files from the React frontend app
+// ✅ Serve static files from React frontend
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-// API Routes
+// ✅ API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/expenses', require('./routes/expenses'));
 
@@ -25,10 +33,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
+// ✅ Create default admin user if not exists
 async function createAdminUser() {
   try {
     const existingAdmin = await User.findOne({ email: 'admin@example.com' });
-
     if (existingAdmin) {
       console.log('Admin user already exists');
       return;
@@ -49,7 +57,7 @@ async function createAdminUser() {
   }
 }
 
-// MongoDB connection
+// ✅ MongoDB connection
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
@@ -58,18 +66,18 @@ mongoose
   })
   .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
-
-// API test route
+// ✅ API test route
 app.get('/api', (req, res) => {
   res.json({ message: 'Expense Tracker API is working!' });
 });
 
-// FIXED: Catch-all handler for client-side routing
-// Use a specific pattern instead of '*'
+// ✅ Catch-all handler for client-side routing
+// Ensures React routes work
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
