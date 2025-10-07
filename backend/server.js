@@ -9,7 +9,7 @@ const User = require('./models/User');
 
 const app = express();
 
-// ✅ SIMPLE CORS setup - No complex options
+// ✅ Simple CORS
 app.use(cors({
   origin: [
     'http://localhost:5173',
@@ -18,7 +18,6 @@ app.use(cors({
   credentials: true
 }));
 
-// ✅ Security middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -134,15 +133,19 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ✅ 404 for API routes
-app.use('/api/*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'API route not found'
-  });
+// ✅ FIXED: 404 handler for API routes - Use function instead of route
+app.use('/api', (req, res, next) => {
+  // If we get here, no API route matched
+  if (!req.route) {
+    return res.status(404).json({
+      success: false,
+      message: `API route not found: ${req.originalUrl}`
+    });
+  }
+  next();
 });
 
-// ✅ Catch-all for React app - SIMPLE VERSION
+// ✅ Catch-all for React app
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
