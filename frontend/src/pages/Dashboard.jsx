@@ -57,7 +57,7 @@ const Dashboard = () => {
   const deleteExpense = async (expenseId) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
-        await axios.delete(`/api/expenses/${expenseId}`); // ✅ FIXED: Remove localhost
+        await axios.delete(`/api/expenses/${expenseId}`);
         fetchDashboardData();
         fetchExpenses();
       } catch (error) {

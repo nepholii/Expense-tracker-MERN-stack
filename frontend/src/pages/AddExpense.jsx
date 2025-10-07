@@ -36,46 +36,46 @@ const AddExpense = () => {
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  try {
-    const totalAmount = calculateTotal();
-    
-    const expenseData = {
-      description: formData.description.trim(),
-      amount: parseFloat(formData.amount),
-      type: formData.type,
-      taxType: formData.taxType,
-      taxAmount: parseFloat(formData.taxAmount) || 0,
-      totalAmount: totalAmount 
-    };
+    try {
+      const totalAmount = calculateTotal();
+      
+      const expenseData = {
+        description: formData.description.trim(),
+        amount: parseFloat(formData.amount),
+        type: formData.type,
+        taxType: formData.taxType,
+        taxAmount: parseFloat(formData.taxAmount) || 0,
+        totalAmount: totalAmount 
+      };
 
-    console.log('Sending expense data:', expenseData);
+      console.log('Sending expense data:', expenseData);
 
-    const response = await axios.post('http://localhost:5000/api/expenses', expenseData);
-    
-    console.log(' Expense added successfully:', response.data);
-    
-    
-    navigate('/dashboard');
-    
-  } catch (error) {
-    console.error('Error adding expense:', error);
-    
-    if (error.response) {
-      setError(error.response.data?.message || `Server error: ${error.response.status}`);
-    } else if (error.request) {
-      setError('Server is not responding. Please check if the backend is running.');
-    } else {
-      setError(error.message || 'Error adding expense');
+      // ✅ FIXED: Use relative URL instead of localhost
+      const response = await axios.post('/api/expenses', expenseData);
+      
+      console.log('Expense added successfully:', response.data);
+      
+      navigate('/dashboard');
+      
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      
+      if (error.response) {
+        setError(error.response.data?.message || `Server error: ${error.response.status}`);
+      } else if (error.request) {
+        setError('Server is not responding. Please check if the backend is running.');
+      } else {
+        setError(error.message || 'Error adding expense');
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="form-container">
