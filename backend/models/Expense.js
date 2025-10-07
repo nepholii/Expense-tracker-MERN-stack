@@ -43,7 +43,7 @@ const expenseSchema = new mongoose.Schema({
 
 
 expenseSchema.pre('save', function(next) {
-  console.log('Calculating totalAmount...');
+  console.log('🔄 Calculating totalAmount...');
   console.log('Amount:', this.amount, 'TaxType:', this.taxType, 'TaxAmount:', this.taxAmount);
   
   if (this.taxType === 'percentage') {
@@ -52,7 +52,7 @@ expenseSchema.pre('save', function(next) {
     this.totalAmount = this.amount + this.taxAmount;
   }
   
-  console.log('Calculated totalAmount:', this.totalAmount);
+  console.log('✅ Calculated totalAmount:', this.totalAmount);
   next();
 });
 

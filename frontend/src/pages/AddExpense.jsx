@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-// Base API URL from environment
+// Add this at the top
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const AddExpense = () => {
@@ -16,9 +17,9 @@ const AddExpense = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -27,7 +28,6 @@ const AddExpense = () => {
     }));
   };
 
-  // Calculate total based on tax type
   const calculateTotal = () => {
     const amount = parseFloat(formData.amount) || 0;
     const tax = parseFloat(formData.taxAmount) || 0;
@@ -39,58 +39,51 @@ const AddExpense = () => {
     }
   };
 
-  // Submit expense
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const totalAmount = calculateTotal();
+  try {
+    const totalAmount = calculateTotal();
+    
+    const expenseData = {
+      description: formData.description.trim(),
+      amount: parseFloat(formData.amount),
+      type: formData.type,
+      taxType: formData.taxType,
+      taxAmount: parseFloat(formData.taxAmount) || 0,
+      totalAmount: totalAmount
+    };
 
-      const expenseData = {
-        description: formData.description.trim(),
-        amount: parseFloat(formData.amount),
-        type: formData.type,
-        taxType: formData.taxType,
-        taxAmount: parseFloat(formData.taxAmount) || 0,
-        totalAmount: totalAmount
-      };
+    console.log('Sending expense data:', expenseData);
 
-      const token = localStorage.getItem("token"); // Get JWT token
+    const response = await axios.post(`${API_BASE_URL}/api/expenses`, expenseData);
+    
+    console.log('✅ Expense added successfully:', response.data);
+    
 
-      const response = await axios.post(
-        `${API_BASE_URL}/api/expenses`,
-        expenseData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      console.log("✅ Expense added successfully:", response.data);
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("❌ Error adding expense:", err);
-
-      if (err.response) {
-        setError(err.response.data?.message || `Server error: ${err.response.status}`);
-      } else if (err.request) {
-        setError("Server is not responding. Please check if the backend is running.");
-      } else {
-        setError(err.message || "Error adding expense");
-      }
-    } finally {
-      setLoading(false);
+    navigate('/dashboard');
+    
+  } catch (error) {
+    console.error('❌ Error adding expense:', error);
+    
+    if (error.response) {
+      setError(error.response.data?.message || `Server error: ${error.response.status}`);
+    } else if (error.request) {
+      setError('Server is not responding. Please check if the backend is running.');
+    } else {
+      setError(error.message || 'Error adding expense');
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="form-container">
       <div className="form-card">
         <h2>➕ Add New Transaction</h2>
-
         {error && (
           <div className="error-message">
             <strong>Error:</strong> {error}
