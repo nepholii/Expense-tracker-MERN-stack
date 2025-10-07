@@ -51,12 +51,13 @@ async function createAdminUser() {
 
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/expense-tracker')
+  .connect(process.env.MONGODB_URI)
   .then(() => {
-    console.log('Connected to MongoDB');
+    console.log('✅ Connected to MongoDB');
     createAdminUser(); 
   })
-  .catch((err) => console.log('MongoDB Connection Error:', err));
+  .catch((err) => console.error('❌ MongoDB Connection Error:', err));
+
 
 // API test route
 app.get('/api', (req, res) => {
