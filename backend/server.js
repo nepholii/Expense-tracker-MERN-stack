@@ -38,7 +38,7 @@ async function createAdminUser() {
     const adminUser = new User({
       name: 'System Admin',
       email: 'admin@example.com',
-      password: 'hashedPassword',
+      password: hashedPassword,
       role: 'admin',
     });
 
@@ -63,8 +63,9 @@ app.get('/api', (req, res) => {
   res.json({ message: 'Expense Tracker API is working!' });
 });
 
-// AFTER API routes - catch all handler to send back React's index.html
-app.get('*', (req, res) => {
+// FIXED: Catch-all handler for client-side routing
+// Use a specific pattern instead of '*'
+app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
