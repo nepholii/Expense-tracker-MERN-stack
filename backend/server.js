@@ -2,27 +2,28 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const path = require('path');
 require('dotenv').config();
-
 
 const User = require('./models/User');
 
 const app = express();
 
-
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the React frontend app
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
+// API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/expenses', require('./routes/expenses'));
 
-
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong!' });
 });
-
 
 async function createAdminUser() {
   try {
@@ -37,7 +38,7 @@ async function createAdminUser() {
     const adminUser = new User({
       name: 'System Admin',
       email: 'admin@example.com',
-      password: 'admin123',
+      password: 'hashedPassword',
       role: 'admin',
     });
 
@@ -48,7 +49,7 @@ async function createAdminUser() {
   }
 }
 
-
+// MongoDB connection
 mongoose
   .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/expense-tracker')
   .then(() => {
@@ -57,11 +58,15 @@ mongoose
   })
   .catch((err) => console.log('MongoDB Connection Error:', err));
 
-
-app.get('/', (req, res) => {
+// API test route
+app.get('/api', (req, res) => {
   res.json({ message: 'Expense Tracker API is working!' });
 });
 
+// AFTER API routes - catch all handler to send back React's index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
