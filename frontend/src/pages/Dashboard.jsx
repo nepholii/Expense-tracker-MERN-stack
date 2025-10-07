@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
+
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalIncome: 0,
@@ -21,6 +22,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     console.log('Dashboard mounted, fetching data...');
+    console.log('Current user:', user);
     fetchDashboardData();
     fetchExpenses();
   }, [currentPage]);
@@ -28,11 +30,11 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       console.log('Fetching dashboard data...');
-      const response = await axios.get('http://localhost:5000/api/expenses/dashboard');
+      const response = await axios.get('/api/expenses/dashboard'); // ✅ FIXED: Remove localhost
       console.log('Dashboard data:', response.data);
       setStats(response.data.data || response.data);
     } catch (error) {
-      console.error(' Error fetching dashboard data:', error);
+      console.error('❌ Error fetching dashboard data:', error);
       setError('Failed to load dashboard data');
     }
   };
@@ -40,13 +42,13 @@ const Dashboard = () => {
   const fetchExpenses = async () => {
     try {
       console.log('Fetching expenses...');
-      const response = await axios.get(`http://localhost:5000/api/expenses?page=${currentPage}&limit=5`);
+      const response = await axios.get(`/api/expenses?page=${currentPage}&limit=5`); // ✅ FIXED: Remove localhost
       console.log('Expenses data:', response.data);
       setExpenses(response.data.data?.expenses || response.data.expenses || []);
       setTotalPages(response.data.data?.totalPages || response.data.totalPages || 1);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching expenses:', error);
+      console.error('❌ Error fetching expenses:', error);
       setError('Failed to load expenses');
       setLoading(false);
     }
@@ -55,11 +57,11 @@ const Dashboard = () => {
   const deleteExpense = async (expenseId) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/expenses/${expenseId}`);
+        await axios.delete(`/api/expenses/${expenseId}`); // ✅ FIXED: Remove localhost
         fetchDashboardData();
         fetchExpenses();
       } catch (error) {
-        console.error('Error deleting expense:', error);
+        console.error('❌ Error deleting expense:', error);
         alert('Error deleting transaction. Please try again.');
       }
     }
@@ -69,6 +71,13 @@ const Dashboard = () => {
     logout();
     navigate('/login');
   };
+
+  // Add this debug info
+  console.log('🔍 Dashboard render state:');
+  console.log('   User:', user);
+  console.log('   Loading:', loading);
+  console.log('   Error:', error);
+  console.log('   Expenses count:', expenses.length);
 
   if (loading) {
     return (
@@ -164,13 +173,13 @@ const Dashboard = () => {
                     onClick={() => navigate(`/edit-expense/${expense._id}`)}
                     className="edit-btn"
                   >
-                     Edit
+                    Edit
                   </button>
                   <button 
                     onClick={() => deleteExpense(expense._id)}
                     className="delete-btn"
                   >
-                     Delete
+                    Delete
                   </button>
                 </div>
               </div>
