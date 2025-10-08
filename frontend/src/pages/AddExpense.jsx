@@ -58,7 +58,7 @@ const handleSubmit = async (e) => {
 
     console.log('Sending expense data:', expenseData);
 
-    const response = await axios.post(`${API_BASE_URL}/api/expenses`, expenseData);
+    const response = await axios.post(`${API_BASE_URL}/expenses`, expenseData);
     
     console.log('✅ Expense added successfully:', response.data);
     
